@@ -4,7 +4,7 @@ from selenium.webdriver.common.keys import Keys
 import os
 # taggee_class = "taggee"
 taggee_class = "_hli"
-
+from ttictoc import TicToc
 
 class TagFinder():
     def __init__(self):
@@ -13,6 +13,8 @@ class TagFinder():
         self.taggees = {}
         self.successful_retrievals = 0
         self.first_url = ""
+        self.MAX_RUN_TIME = 60
+        self.timer = TicToc()
 
     def setup_selenium_driver(self):
         usr = os.getenv('fbusername')
@@ -86,8 +88,8 @@ class TagFinder():
 
         driver = self.driver
         profile_url = "https://www.facebook.com/Ross.Ross.1080/photos"
-        # profile_url = "https://www.facebook.com/steviedunbardude/photos"
-        # profile_url = "https://www.facebook.com/morgan.mueller.14/photos"
+        profile_url = "https://www.facebook.com/steviedunbardude/photos"
+        #profile_url = "https://www.facebook.com/lydia.jessup/photos"
         driver.get(profile_url)
         #driver.get("https://www.facebook.com/dana.elkis/photos")
         sleep(.5)
@@ -99,8 +101,8 @@ class TagFinder():
         sleep(1)
         print("starting iteration ")
 
-
-        for i in range(300):
+        self.timer.tic()
+        for i in range(1300):
 
             tager = self.get_name_of_tagger(driver)
 
@@ -108,14 +110,15 @@ class TagFinder():
                 self.first_url = driver.current_url
             if tager not in self.taggees.keys():
                 self.taggees[tager] = {"tag_count": 1, "first_tagged": "", "last_tagged": ""}
-
-
                 print("You have been tagged by {} count is at {}".format(tager,len(self.taggees.keys())))
             else:
                 self.taggees[tager]["tag_count"] += 1
             # print("You have been tagged by {} {}  times ".format(tager,taggees[tager]))
             driver.find_element_by_css_selector('body').send_keys(Keys.ARROW_RIGHT)
             sleep(self.in_between_wait)
+
+            if self.timer.toc() > self.MAX_RUN_TIME:
+                self.stop_iteration_and_display_data()
 
         self.stop_iteration_and_display_data()
 
