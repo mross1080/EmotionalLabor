@@ -13,7 +13,7 @@ class TagFinder():
         self.taggees = {}
         self.successful_retrievals = 0
         self.first_url = ""
-        self.MAX_RUN_TIME = 60
+        self.MAX_RUN_TIME = 360
         self.timer = TicToc()
 
     def setup_selenium_driver(self):
@@ -89,9 +89,11 @@ class TagFinder():
         driver = self.driver
         profile_url = "https://www.facebook.com/Ross.Ross.1080/photos"
         profile_url = "https://www.facebook.com/steviedunbardude/photos"
-        #profile_url = "https://www.facebook.com/lydia.jessup/photos"
+        profile_url = "https://www.facebook.com/mary.notari"
+        if "/photos" not in profile_url:
+            profile_url += "/photos"
         driver.get(profile_url)
-        #driver.get("https://www.facebook.com/dana.elkis/photos")
+
         sleep(.5)
         driver.find_element_by_css_selector('body').click()
         tags = driver.find_elements_by_class_name('fbPhotoStarGridElement')
@@ -102,7 +104,7 @@ class TagFinder():
         print("starting iteration ")
 
         self.timer.tic()
-        for i in range(1300):
+        for i in range(2130):
 
             tager = self.get_name_of_tagger(driver)
 
@@ -120,20 +122,30 @@ class TagFinder():
             if self.timer.toc() > self.MAX_RUN_TIME:
                 self.stop_iteration_and_display_data()
 
+
         self.stop_iteration_and_display_data()
 
     def stop_iteration_and_display_data(self):
-
+        print("Process took {}s".format(self.timer.toc()))
         self.driver.quit()
 
         print("Done Iterating through FB Photos, displaying counts now.....\n\n\n\n")
         sleep(1)
+        with open('output.txt', 'w') as writer:
+            # Alternatively you could use
+            # writer.writelines(reversed(dog_breeds))
 
-        for tager in self.taggees.keys():
-            print("You have been tagged by {} , {} times ".format(tager, self.taggees[tager]["tag_count"]))
-            print("The first time you were tagged by them was {}".format(self.taggees[tager]["first_tagged"]))
-            print("The last time you were tagged by them was {}".format(self.taggees[tager]["last_tagged"]))
-            print("-----------------------------------------------------------------------------")
+            # Write the dog breeds to the file in reversed order
+
+
+            for tager in self.taggees.keys():
+
+                tag_message = "You have been tagged by {} , {} times \n".format(tager, self.taggees[tager]["tag_count"])
+                print(tag_message)
+                writer.write(tag_message)
+                print("The first time you were tagged by them was {}".format(self.taggees[tager]["first_tagged"]))
+                print("The last time you were tagged by them was {}".format(self.taggees[tager]["last_tagged"]))
+                print("-----------------------------------------------------------------------------")
         exit()
 
 
